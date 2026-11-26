@@ -162,6 +162,8 @@ const destinations = await res.json();
 ```tsx
 async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
   event.preventDefault();
+  const formdata = new FormData(event.currentTarget)
+  const data = Object.fromEntries(formdata.entries())
   const res = await fetch(`http://localhost:8000/add-destination`, {
     method: "POST",
     headers: {
