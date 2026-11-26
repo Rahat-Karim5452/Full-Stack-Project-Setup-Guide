@@ -1,11 +1,6 @@
-Click the **Copy** button in the top-right corner of the box below and paste it directly into your `README.md` file. 
-
-Every command and code block is formatted so GitHub and VS Code will automatically show a **one-click copy button** on each section, with **Server-Side** and **Client-Side** clearly separated.
-
-
 # 🚀 Full-Stack Project Setup Guide
 
-A complete quick-reference boilerplate guide for setting up the **Server-Side (Node.js, Express, MongoDB)** and **Client-Side (Next.js, shadcn/ui, Google Fonts)**.
+A complete quick-reference boilerplate guide for setting up the **Server-Side (Node.js, Express, MongoDB)**, **CRUD Operations**, and **Client-Side (Next.js, shadcn/ui, Google Fonts)**.
 
 ---
 
@@ -13,6 +8,9 @@ A complete quick-reference boilerplate guide for setting up the **Server-Side (N
 - [🖥️ Server-Side Setup](#️-server-side-setup)
   - [Initial Setup & Dependencies (Steps 1–7)](#initial-setup--dependencies)
   - [Universal Server Boilerplate (Step 8)](#8-universal-server-boilerplate-same-for-all-projects)
+- [🔄 Server & Client-Side CRUD Use](#-server--client-side-crud-use)
+  - [1. GET Data (Read from Database)](#1-get-information-from-database)
+  - [2. POST Data (Send from Client to Database)](#2-post-data-from-client-to-database)
 - [💻 Client-Side Setup](#-client-side-setup)
   - [Next.js & shadcn/ui Setup (Steps 1–3)](#initial-setup-nextjs--shadcnui)
   - [Font Setup in `layout.tsx` (Step 4)](#4-font-setup-guide-layouttsx)
@@ -57,6 +55,7 @@ import "dotenv/config";
 ```
 Create a `.env` file in your server root folder:
 ```env
+PORT=8000
 MONGODB_URI=your_mongodb_connection_string_here
 ```
 
@@ -97,7 +96,7 @@ import "dotenv/config";
 import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT||8000;
+const PORT = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
@@ -123,6 +122,67 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running at ${PORT}`);
+});
+```
+
+---
+
+# 🔄 Server & Client-Side CRUD Use
+
+### Database & Collection Reference (Server-Side)
+Define your database and collection once after connecting to MongoDB:
+```javascript
+const db = mongoClient.db("wanderlustProject");
+const destinationCollection = db.collection("destinations");
+```
+
+---
+
+### 1. GET Information from Database
+
+#### 🖥️ Server-Side (API Route to Fetch Data)
+```javascript
+app.get("/destinations", async (req, res) => {
+  const result = await destinationCollection.find({}).toArray();
+  res.send(result);
+});
+```
+
+#### 💻 Client-Side (Fetch & Show Data)
+```tsx
+const res = await fetch(`http://localhost:8000/destinations`);
+const destinations = await res.json();
+```
+
+---
+
+### 2. POST Data from Client to Database
+
+#### 💻 Client-Side (Form Submit Handler)
+```tsx
+async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const res = await fetch(`http://localhost:8000/add-destination`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(draft),
+  });
+  const data = await res.json();
+  console.log(data);
+}
+```
+
+#### 🖥️ Server-Side (API Route to Insert Data)
+```javascript
+const db = mongoClient.db("wanderlustProject");
+const destinationCollection = db.collection("destinations");
+
+app.post("/add-destination", async (req, res) => {
+  const data = req.body;
+  const result = await destinationCollection.insertOne(data);
+  res.send(result);
 });
 ```
 
